@@ -1,7 +1,7 @@
 # About | Modular Game Controller
 
 ## Team
-- Sofia Sudan
+- Sofia Sadun
 - Duncan Thomas McGonagle
 - Hannah Carroll
 
