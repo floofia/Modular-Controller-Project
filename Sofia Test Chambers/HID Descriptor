@@ -1,0 +1,32 @@
+struct Controller_report_t
+{
+    uint40_t buttons;
+    int8_t left_x;
+    int8_t left_y;
+    int8_t right_x;
+    int8_t right_y;
+}
+USAGE_PAGE (Generic Desktop)
+USAGE (Game Pad)
+COLLECTION (Application)
+    COLLECTION (Physical)
+        USAGE_PAGE (Button)
+        USAGE_MINIMUM (Button 1)
+        USAGE_MAXIMUM (Button 16)
+        LOGICAL_MINIMUM (0)
+        LOGICAL_MAXIMUM (1)
+        REPORT_COUNT (16)
+        REPORT_SIZE (1)
+        INPUT (Data,Var,Abs)
+        USAGE_PAGE (Generic Desktop)
+        USAGE (X)
+        USAGE (Y)
+        USAGE (Z)
+        USAGE (Rx)
+        LOGICAL_MINIMUM (-127)
+        LOGICAL_MAXIMUM (127)
+        REPORT_SIZE (8)
+        REPORT_COUNT (4)
+        INPUT (Data,Var,Abs)
+    END COLLECTION
+END COLLECTION
