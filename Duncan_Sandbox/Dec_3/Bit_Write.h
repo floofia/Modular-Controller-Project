@@ -1,6 +1,15 @@
-#include "globals.h"
-//#include "i2c_scan.h"
+/* SDSMT
+ * #11ModularGameController
+ * written by Duncan McGonagle, Sofia Sadun
+ * Handles functions that edit the ATTiny817 EEPROM
+*/
+#ifndef BIT_WRITE_H
+#define BIT_WRITE_H
 
+#include "globals.h"
+
+
+//functions
 int string_convert_int();
 String string_read();
 void all_devices_output();
@@ -16,7 +25,9 @@ String mod_type(int type);
 Adafruit_seesaw ss;
 Adafruit_seesaw i2c_outputs[8];
 
-
+/* Reads string from the user
+ * Then converts it to an integer
+*/ 
 int string_convert_int()
 {
   String string;
@@ -27,14 +38,12 @@ int string_convert_int()
 
   string = Serial.readStringUntil('\0');
 
-  //string.toCharArray(char_array, 32);
-
   return string.toInt();
-  //hex = strtoul(char_array, NULL, 32);
-  //return hex;
+
 }
 
-
+/* Reads string from the user
+*/
 String string_read()
 {
 
@@ -42,24 +51,20 @@ String string_read()
   char char_array[32];
   int hex;
 
+  //Waits for the users input
   while (Serial.available() == 0) {}
-
+  //reads until a null terminator
   string = Serial.readStringUntil('\0');
 
-  //string.toCharArray(char_array, 32);
-
-  // string.toCharArray(char_array, 64);
-
   return string;
-  //hex = strtoul(char_array, NULL, 32);
-  //return hex;
 
 }
 
-
+/* Initializes i2c connected devices
+*/
 void all_devices_output()
 {
-
+  //redundency check
   i2c_scan();
   i2c_scan();
 
@@ -68,6 +73,7 @@ void all_devices_output()
   
   for (int i = 0; i < nDevices; i++)
   {
+    //error checking if i2c device does not start
     if (!i2c_outputs[i].begin(i2c_addresses[i]))
     {
       //Serial.print(nDevices);
@@ -85,10 +91,11 @@ void all_devices_output()
 }
 
 
-
+/* Overwrites values in the i2c_outputts array
+*/
 void all_devices_buffer()
 {
-
+  //redundency check
   i2c_scan();
   i2c_scan();
 
@@ -96,26 +103,22 @@ void all_devices_buffer()
   {
     if (!i2c_outputs[i].begin(i2c_addresses[i]))
     {
-      //Serial.print(nDevices);
-     // Serial.println("Address 0000, BAD, BAD, BAD");
-      //delay(10);
-    }
 
-   // read_device_rom(i2c_outputs[i]);
+    }
 
   }
   
-
-
 }
 
 
-//read 0-127
+/* Outputs all registers of the EEPROM
+*  Useful for debugging
+*/
 void read_entire_rom(Adafruit_seesaw ss)
 {
   int i;
   int eepromval;
-
+  //outputs all registers to terminal
   for (i = 0; i < 128; i++)
   {
     Serial.print(F("\nInitial read from register: "));
@@ -125,7 +128,9 @@ void read_entire_rom(Adafruit_seesaw ss)
 
 }
 
-
+/* Outputs all used registers of the EEPROM
+*  Output matches the reading format of the GUI
+*/
 void read_device_rom(Adafruit_seesaw ss)
 {
   char module_name[64];
@@ -137,7 +142,7 @@ void read_device_rom(Adafruit_seesaw ss)
 
   //Serial.print(F("\nName of Device: "));
 
-  for (i = 0; i < 64; i++)
+  for (i = 0; i < 32; i++)
   {
     eepromval = ss.EEPROMRead8(i);
     module_name[i] = (char)eepromval;
@@ -164,8 +169,9 @@ void read_device_rom(Adafruit_seesaw ss)
   //Serial.print(F("\nAddress: "));
   address = ss.EEPROMRead8(127);
 
+  //Writing the info to the screen formatted nicely for the 
+  // GUI and user to read
   //address
-
   Serial.print("Address ");
   Serial.print(address);
   Serial.print(", ");
@@ -182,7 +188,8 @@ void read_device_rom(Adafruit_seesaw ss)
 
 }
 
-
+/* Write sequence for modifying modules
+*/
 void write_device_rom_sequence(Adafruit_seesaw &ss)
 {
 
@@ -192,10 +199,13 @@ void write_device_rom_sequence(Adafruit_seesaw &ss)
 
   write_device_address(ss);
 
-
   ss.begin();
 }
 
+/* Reads and writes register 127.
+*  This is the register of the device.
+*  The user is  prompted for an address change
+*/
 void write_device_address(Adafruit_seesaw &ss)
 {
   int address = 50;
@@ -210,6 +220,8 @@ void write_device_address(Adafruit_seesaw &ss)
 
   eepromval = string_convert_int();
 
+  //make sure address is not too low or too high
+  //others issues with reading the device will occur
   if (!(eepromval > 25 && eepromval < 125))
   {
     while (!(eepromval > 25 && eepromval < 125))
@@ -235,24 +247,30 @@ void write_device_address(Adafruit_seesaw &ss)
 
 }
 
-
+/* First 32 registers are read and outputs to 
+*  The screen. This is the name of the device.
+*  The user is  prompted for a name change
+*/
 void write_device_mod_name(Adafruit_seesaw ss)
 {
+  //temp values for writing to the eeprom
   String string;
   char module_name[32];
   int eepromval;
   int i;
 
+  //reads 32 registers of the EEPROM
+  //and saves it to a temp variable
   Serial.print("Initial Name of Device: ");
   for (i = 0; i < 32; i++)
   {
     eepromval = ss.EEPROMRead8(i);
     module_name[i] = (char)eepromval;
   }
-
+  //prints name that was read from the EEPROM
   Serial.println(module_name);
   Serial.println();
-
+  //prompts user for a new name
   Serial.print("Enter New Name for Device: ");
   string = string_read();
   Serial.println();
@@ -260,11 +278,15 @@ void write_device_mod_name(Adafruit_seesaw ss)
 
   Serial.println();
   Serial.println("!!Writing Name!!");
+  //name is written character by character 
+  //into the registers
   for (i = 0; i < 32; i++)
   {
     ss.EEPROMWrite8(i, module_name[i]);
   }
   Serial.println();
+  //rereads what was written to the eeprom
+  //so you know it was correct
   Serial.print("New Name of Device: ");
   for (i = 0; i < 32; i++)
   {
@@ -280,14 +302,19 @@ void write_device_mod_name(Adafruit_seesaw ss)
 
 }
 
+
+/* A value is read from register 126 of the EEPROM
+*  This is the device type of the module
+*  The user is  prompted to change the device type
+*/
 void write_device_dev_type(Adafruit_seesaw ss)
 {
- 
-  
+  //temp values that will be written to memory
   int device_type;
   int eepromval;
-  int address;
+  //int address;
 
+  //read and return device type
   Serial.print("Initial Device Type: ");
   device_type = ss.EEPROMRead8(126);
   Serial.print(device_type);
@@ -295,23 +322,23 @@ void write_device_dev_type(Adafruit_seesaw ss)
   Serial.println();
   
   Serial.println("Device Types: ");
-  
+
+  //return menu stored in globals.h
   for (int i = 0; i < 13; i++){Serial.println(names_dev[i]);}
 
+  //read new value from user and write it to the EEPROM
   Serial.print("Enter New Device Types: ");
-
-  
   eepromval = string_convert_int();
   Serial.println();
   ss.EEPROMWrite8(126, eepromval);
-  //Serial.print("New Device Type: ");
-  //address = ss.EEPROMRead8(126);
   Serial.println();
-  //Serial.print(address);
+
 
 }
 
-
+/* Value stored in register 126 is read
+*  The value determines the device type
+*/
 String mod_type(int type)
 {
 
@@ -354,3 +381,6 @@ String mod_type(int type)
 
 
 }
+
+
+#endif

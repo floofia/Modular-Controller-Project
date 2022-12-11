@@ -1,19 +1,26 @@
-//write to aatiny817
-//change bit in register
-/*
-   Read and Write values to the
+/* SDSMT
+ * #11ModularGameController
+ * written by Duncan McGonagle
+ * Main file for handling programming the i2c devices
+ * Outputs information the GUI can read
 */
+
+#include <Arduino.h>
 #include "globals.h"
 #include "Adafruit_seesaw.h"
 #include "serial_setup.h"
 #include "i2c_scan.h"
 #include "Bit_Write.h"
 
-
+/* Displays the connected i2c devices to the screen
+*  This can be easily viewed by the user and the GUI
+*  The user is given menu prompts to choose the 
+*  module they want to program and view
+*/
 void setup() {
-  uint8_t eepromval;
-  uint8_t attiny_device;
-  uint8_t device_register;
+
+
+  int attiny_device;
   int selection;
 
   serial_setup(115200);
@@ -23,20 +30,12 @@ void setup() {
   while (1)
   {
 
-    
-   /* for (int i = 0; i < 5; i++) {
-      i2c_addresses[i] = 0;
-    }
-
-    i2c_scan();
-    */
-
     i2c_scan();
     
     ss.begin(i2c_addresses[0]);
 
     i2c_scan();
-    
+    //reinitialize 
     all_devices_buffer();
     all_devices_output();
     
@@ -50,7 +49,8 @@ void setup() {
       //Serial.println(attiny_device);
       Serial.println();
       Serial.println();
-
+      
+      //check to see if the address entered was valid
       if (!ss.begin(attiny_device))
       {
         Serial.println(F("seesaw failed to start"));
@@ -60,7 +60,7 @@ void setup() {
 
 
     } while (!ss.begin(attiny_device));
-
+    //menu for users to see which option they want
     do {
       selection = 0;
       Serial.println("READ MODULE       [1]");
@@ -68,6 +68,7 @@ void setup() {
       Serial.println("READ ALL MODULES  [3]");
       Serial.println();
       Serial.print("Selection: ");
+      //reads selection from user
       selection = string_convert_int();
       Serial.println();
       Serial.println();
@@ -92,6 +93,7 @@ void setup() {
     }
 
   }
+
   i2c_scan();
   delay(1000);
 
@@ -99,9 +101,7 @@ void setup() {
 
 
 
-
-
 void loop()
 {
-  //DONT WRITE EEPROM IN A LOOP!!!! YOU WILL DESTROY YOUR FLASH!!!
+  //unneeded as we do not reach this point
 }
