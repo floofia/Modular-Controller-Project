@@ -1,5 +1,9 @@
 # About | Modular Game Controller
 
+## [Wiki](https://gitlab.com/groups/sdmines/sd/2022/11/-/wikis/home)
+
+For information regarding this project.
+
 ## Team
 - Sofia Sadun
 - Duncan Thomas McGonagle
